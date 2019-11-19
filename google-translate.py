@@ -8,7 +8,8 @@ def replace_bullet(str):
 	bullet = '•'
 	return str.replace(' - ', ' {} '.format(bullet))
 
-driver = webdriver.Chrome('chromedriver/win/chromedriver')
+# driver = webdriver.Chrome('chromedriver/win/chromedriver')
+driver = webdriver.Chrome()
 
 special_words = ['Version']
 new_words = []
@@ -103,13 +104,12 @@ for i in range(len(final_text)):
 		final_text[i] = final_text[i].replace(new_words[k], special_words[k])
 
 # Clear out old translated change log file
-open('translated_change_log.txt', 'w').close()
+# open('translated_change_log.txt', 'w').close()
 # Write final lines to translated change log file
-file = open('translated_change_log.txt', 'w+')
-for i in range(len(final_text)):
-	# Write each line
-	file.write(final_text[i])
-	# New line except last line
-	if i != len(final_text) - 1:
-		file.write('\n')
-file.close()
+with open('translated_change_log.txt', 'w+') as file:
+	for i in range(len(final_text)):
+		# Write each line
+		file.write(final_text[i])
+		# New line except last line
+		if i != len(final_text) - 1:
+			file.write('\n')
