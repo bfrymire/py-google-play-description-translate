@@ -1,7 +1,9 @@
-from selenium import webdriver
+import random
 
 import urllib.parse
-import random
+from selenium import webdriver
+
+import pathlib
 
 def replace_bullet(str):
 	# Bullet character
@@ -22,6 +24,7 @@ language_codes = ['en-US', 'es-ES', 'pt-BR']
 # Google Translate url
 url = 'https://translate.google.com/#view=home'
 # "What's New" text file
+
 with open('change_log.txt', 'r') as file:
 	change_log_text = [line.rstrip('\n') for line in file]
 

@@ -1,0 +1,17 @@
+<en-US>
+Version 1.0:
+ • Some files have changed
+ • Fixed some minor bugs
+</en-US>
+
+<es-ES>
+Version 1.0:
+ • Algunos archivos han cambiado
+ • Se corrigieron algunos errores menores
+</es-ES>
+
+<pt-BR>
+Version 1.0:
+ • Alguns arquivos foram alterados
+ • Corrigidos alguns bugs menores
+</pt-BR>
