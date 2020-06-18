@@ -9,7 +9,7 @@ import pathlib
 def replace_bullet(str):
 	# Bullet character
 	bullet = '•'
-	return str.replace(' - ', ' {} '.format(bullet))
+	return str.replace(' - ', f' {bullet} ')
 
 if __name__ == "__main__":
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 	for l in range(len(languages)):
 
 		# Add header to final text
-		final_text.append('<{}>'.format(language_codes[l]))
+		final_text.append(f'<{language_codes[l]}>')
 
 		if languages[l] == original_language:
 			final_text.append(replace_bullet(change_log_text))
@@ -62,7 +62,7 @@ if __name__ == "__main__":
 					 }
 
 			# Create the full url
-			full_url = 'https://translate.google.com/#view=home&{}'.format(urllib.parse.urlencode(params))
+			full_url = f'https://translate.google.com/#view=home&{urllib.parse.urlencode(params)}'
 
 			# Go to the full url
 			driver.get(full_url)
@@ -92,7 +92,7 @@ if __name__ == "__main__":
 			driver.get('about:blank')
 
 		# Add footer to final text
-		final_text.append('</{}>'.format(language_codes[l]))
+		final_text.append(f'</{language_codes[l]}>'
 
 		# Add a space between language blocks
 		if l != len(languages) - 1:
