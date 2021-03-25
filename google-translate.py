@@ -92,7 +92,7 @@ if __name__ == "__main__":
 			driver.get('about:blank')
 
 		# Add footer to final text
-		final_text.append(f'</{language_codes[l]}>'
+		final_text.append(f'</{language_codes[l]}>')
 
 		# Add a space between language blocks
 		if l != len(languages) - 1:
