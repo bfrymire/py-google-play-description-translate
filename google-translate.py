@@ -1,21 +1,34 @@
 import random
 import string
+import time
 
+from bs4 import BeautifulSoup as bs
 import urllib.parse
 from selenium import webdriver
 
 import pathlib
+
 
 def replace_bullet(str):
 	# Bullet character
 	bullet = '•'
 	return str.replace(' - ', f' {bullet} ')
 
+def create_header(header_len=15):
+	header = ''
+	for i in range(header_len):
+		if i % 5 == 0 and i:
+			header += "."
+		header += str(random.choice(range(10)))
+	return header
+
+
 if __name__ == "__main__":
 
 	driver = webdriver.Chrome() ## Use with Google Chrome
 	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
 
+	header = create_header()
 	special_words = ['Version'] ## Special words do not get translated
 	new_words = []
 	original_language = 'en'
@@ -35,7 +48,7 @@ if __name__ == "__main__":
 	for i in range(len(special_words)):
 		new_word = ''
 		for n in range(10):
-			new_word += random.choice(string.ascii_lowercase)
+			new_word += random.choice(string.ascii_uppercase)
 			if n == 4:
 				new_word += '-'
 		new_words.append(new_word)
@@ -55,11 +68,12 @@ if __name__ == "__main__":
 			final_text.append(replace_bullet(change_log_text))
 		else:
 			# Params to pass into the url
-			params = { 'op': 'translate',
-					   'sl': original_language,
-					   'tl': languages[l],
-					   'text': change_log_text
-					 }
+			params = {
+				'op': 'translate',
+				'sl': original_language,
+				'tl': languages[l],
+				'text': f'{header}\n{change_log_text}',
+			}
 
 			# Create the full url
 			full_url = f'https://translate.google.com/#view=home&{urllib.parse.urlencode(params)}'
@@ -67,8 +81,15 @@ if __name__ == "__main__":
 			# Go to the full url
 			driver.get(full_url)
 
-			# Get the html of the page
-			translation = driver.find_element_by_class_name('translation')
+			# Wait for translation to load
+			while True:
+				soup = bs(driver.page_source, 'lxml')
+				elem = soup.find('span', text=header)
+				if elem:
+					break
+				time.sleep(0.25)
+
+			translation = elem.parent.parent
 			translation_lines = translation.find_elements_by_tag_name('span')
 
 			# Cleaning text
@@ -95,7 +116,7 @@ if __name__ == "__main__":
 		final_text.append(f'</{language_codes[l]}>')
 
 		# Add a space between language blocks
-		if l != len(languages) - 1:
+		if not l == len(languages) - 1:
 			final_text.append('')
 
 	# Close the webdriver
@@ -114,5 +135,5 @@ if __name__ == "__main__":
 			# Write each line
 			file.write(final_text[i])
 			# New line except last line
-			if i != len(final_text) - 1:
+			if not i == len(final_text) - 1:
 				file.write('\n')
