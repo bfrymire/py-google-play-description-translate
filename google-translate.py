@@ -11,33 +11,29 @@ def replace_bullet(str):
 	bullet = '•'
 	return str.replace(' - ', f' {bullet} ')
 
-def create_header(header_len=15):
-	header = ''
+def create_header(header_len=15, is_header=False):
+	header = '{'
 	for i in range(header_len):
-		if i % 5 == 0 and i:
-			header += "."
 		header += str(random.choice(range(10)))
-	if not header[-1] == '.':
+	header += '}'
+	# Some translations append a period at the end if one doesn't already exist
+	if is_header and not header[-1] == '.':
 		header += '.'
 	return header
 
 
 if __name__ == "__main__":
 
-	# driver = webdriver.Chrome() ## Use with Google Chrome
-	driver = webdriver.Chrome('./chromedriver/chromedriver') ## Use with Google Chrome
-	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
-
-	header = create_header()
-	special_words = ['Version'] ## Special words do not get translated
+	header = create_header(is_header=True)
+	special_words = ['Version', 'Marvel'] ## Special words do not get translated
 	new_words = []
 	original_language = 'en'
 	languages = ['en', 'es', 'pt']
 	language_codes = ['en-US', 'es-ES', 'pt-BR']
 	# Google Translate url
 	url = 'https://translate.google.com/#view=home'
+	
 	# "What's New" text file
-
 	with open('input.txt', 'r') as file:
 		change_log_text = [line.rstrip('\n') for line in file]
 
@@ -45,18 +41,20 @@ if __name__ == "__main__":
 	final_text = []
 
 	# Editing special words that shouldn't be translated
+	new_word = ''
 	for i in range(len(special_words)):
-		new_word = ''
-		for n in range(10):
-			new_word += random.choice(string.ascii_uppercase)
-			if n == 4:
-				new_word += '-'
+		while not new_word or new_word == header or new_word in new_words:
+			new_word = create_header()
 		new_words.append(new_word)
 		for k in range(len(change_log_text)):
-			change_log_text[k] = change_log_text[k].replace(special_words[i], new_word)
+			change_log_text[k] = change_log_text[k].replace(special_words[i], new_words[i])
 
 	# Join the change_log_text back together
 	change_log_text = '\n'.join(change_log_text)
+
+	# driver = webdriver.Chrome() ## Use with Google Chrome
+	driver = webdriver.Chrome('./chromedriver/chromedriver') ## Use with Google Chrome
+	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
 
 	# Go through each language and get the translation
 	for l in range(len(languages)):
@@ -89,8 +87,10 @@ if __name__ == "__main__":
 				except:
 					time.sleep(0.25)
 
-			parent = elem.find_element_by_xpath('../..')
-			lines = parent.text.split('\n')
+			# Getting translated text
+			parent = elem.find_element_by_xpath('../../..')
+			class_ = parent.get_attribute('class')
+			lines = driver.execute_script(f'return document.querySelector(".{class_}").innerText').split('\n')
 
 			# Cleaning text
 			for i in range(1, len(lines)):
