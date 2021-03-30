@@ -11,33 +11,29 @@ def replace_bullet(str):
 	bullet = '•'
 	return str.replace(' - ', f' {bullet} ')
 
-def create_header(header_len=15):
-	header = ''
-	for i in range(header_len):
-		if i % 5 == 0 and i:
-			header += "."
-		header += str(random.choice(range(10)))
-	if not header[-1] == '.':
-		header += '.'
-	return header
+def create_code(code_len=15, is_header_code=False):
+	code = '{'
+	for i in range(code_len):
+		code += str(random.choice(range(10)))
+	code += '}'
+	# Some translations append a period at the end if one doesn't already exist
+	if is_header_code and not code[-1] == '.':
+		code += '.'
+	return code
 
 
 if __name__ == "__main__":
 
-	# driver = webdriver.Chrome() ## Use with Google Chrome
-	driver = webdriver.Chrome('./chromedriver/chromedriver') ## Use with Google Chrome
-	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
-
-	header = create_header()
-	special_words = ['Version'] ## Special words do not get translated
-	new_words = []
+	header_code = create_code(is_header_code=True)
+	blacklist_words = ['Version'] # Blacklist words do not get translated
+	blacklist_codes = []
 	original_language = 'en'
 	languages = ['en', 'es', 'pt']
 	language_codes = ['en-US', 'es-ES', 'pt-BR']
 	# Google Translate url
 	url = 'https://translate.google.com/#view=home'
+	
 	# "What's New" text file
-
 	with open('input.txt', 'r') as file:
 		change_log_text = [line.rstrip('\n') for line in file]
 
@@ -45,18 +41,20 @@ if __name__ == "__main__":
 	final_text = []
 
 	# Editing special words that shouldn't be translated
-	for i in range(len(special_words)):
-		new_word = ''
-		for n in range(10):
-			new_word += random.choice(string.ascii_uppercase)
-			if n == 4:
-				new_word += '-'
-		new_words.append(new_word)
+	code = ''
+	for i in range(len(blacklist_words)):
+		while not code or code == header_code or code in blacklist_codes:
+			code = create_code()
+		blacklist_codes.append(code)
 		for k in range(len(change_log_text)):
-			change_log_text[k] = change_log_text[k].replace(special_words[i], new_word)
+			change_log_text[k] = change_log_text[k].replace(blacklist_words[i], blacklist_codes[i])
 
 	# Join the change_log_text back together
 	change_log_text = '\n'.join(change_log_text)
+
+	# driver = webdriver.Chrome() ## Use with Google Chrome
+	driver = webdriver.Chrome('./chromedriver/chromedriver') ## Use with Google Chrome
+	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
 
 	# Go through each language and get the translation
 	for l in range(len(languages)):
@@ -72,7 +70,7 @@ if __name__ == "__main__":
 				'op': 'translate',
 				'sl': original_language,
 				'tl': languages[l],
-				'text': f'{header}\n{change_log_text}',
+				'text': f'{header_code}\n{change_log_text}',
 			}
 
 			# Create the full url
@@ -84,13 +82,15 @@ if __name__ == "__main__":
 			# Wait for translation to load
 			while True:
 				try:
-					elem = driver.find_element_by_xpath(f'//span[contains(text(), "{header}")]')
+					elem = driver.find_element_by_xpath(f'//span[contains(text(), "{header_code}")]')
 					break
 				except:
 					time.sleep(0.25)
 
-			parent = elem.find_element_by_xpath('../..')
-			lines = parent.text.split('\n')
+			# Getting translated text
+			parent = elem.find_element_by_xpath('../../..')
+			class_ = parent.get_attribute('class')
+			lines = driver.execute_script(f'return document.querySelector(".{class_}").innerText').split('\n')
 
 			# Cleaning text
 			for i in range(1, len(lines)):
@@ -125,8 +125,8 @@ if __name__ == "__main__":
 
 	# Turn special words back into their original word
 	for i in range(len(final_text)):
-		for k in range(len(special_words)):
-			final_text[i] = final_text[i].replace(new_words[k], special_words[k])
+		for k in range(len(blacklist_words)):
+			final_text[i] = final_text[i].replace(blacklist_codes[k], blacklist_words[k])
 
 	# Clear out old translated change log file
 	# Write final lines to translated change log file
