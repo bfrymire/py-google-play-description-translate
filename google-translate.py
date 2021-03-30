@@ -24,7 +24,8 @@ def create_header(header_len=15):
 
 if __name__ == "__main__":
 
-	driver = webdriver.Chrome() ## Use with Google Chrome
+	# driver = webdriver.Chrome() ## Use with Google Chrome
+	driver = webdriver.Chrome('./chromedriver/chromedriver') ## Use with Google Chrome
 	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
 
 	header = create_header()
@@ -37,7 +38,7 @@ if __name__ == "__main__":
 	url = 'https://translate.google.com/#view=home'
 	# "What's New" text file
 
-	with open('change_log.txt', 'r') as file:
+	with open('input.txt', 'r') as file:
 		change_log_text = [line.rstrip('\n') for line in file]
 
 	# Final text that will be written to translated_change_log
@@ -125,9 +126,8 @@ if __name__ == "__main__":
 			final_text[i] = final_text[i].replace(new_words[k], special_words[k])
 
 	# Clear out old translated change log file
-	# open('translated_change_log.txt', 'w').close()
 	# Write final lines to translated change log file
-	with open('translated_change_log.txt', 'w+') as file:
+	with open('output.txt', 'w+') as file:
 		for i in range(len(final_text)):
 			# Write each line
 			file.write(final_text[i])
