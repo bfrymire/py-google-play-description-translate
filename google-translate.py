@@ -96,6 +96,9 @@ if __name__ == "__main__":
 			for i in range(1, len(lines)):
 				# Get the inner text of the element
 				current_line = lines[i]
+				# Skip blank lines
+				if not current_line:
+					continue
 				# Remove non-breaking spaces unicode character
 				current_line = current_line.replace('&nbsp', ' ')
 				# Remove trailing periods
