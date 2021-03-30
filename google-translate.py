@@ -1,6 +1,7 @@
 import random
 import string
 import time
+import argparse
 
 import urllib.parse
 from selenium import webdriver
@@ -20,6 +21,11 @@ def create_code(code_len=15, is_header_code=False):
 	if is_header_code and not code[-1] == '.':
 		code += '.'
 	return code
+
+parser = argparse.ArgumentParser()
+parser.add_argument('input', help='location of file to translate')
+
+args = parser.parse_args()
 
 
 if __name__ == "__main__":
