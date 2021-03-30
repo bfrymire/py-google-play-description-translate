@@ -99,8 +99,8 @@ if __name__ == "__main__":
 				# Remove non-breaking spaces unicode character
 				current_line = current_line.replace('&nbsp', ' ')
 				# Remove trailing periods
-				while current_line[len(current_line) - 1] == '.':
-					current_line = current_line[:len(current_line) - 2]
+				while current_line[-1] == '.':
+					current_line = current_line[:-1]
 				# Append space in front of bullet points
 				if current_line[0] == '-':
 					current_line = ' ' + current_line
@@ -113,7 +113,7 @@ if __name__ == "__main__":
 		# Add footer to final text
 		final_text.append(f'</{language_codes[l]}>')
 
-		# Add a space between language blocks
+		# Add a line break between language blocks
 		if not l == len(languages) - 1:
 			final_text.append('')
 
