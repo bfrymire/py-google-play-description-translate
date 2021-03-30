@@ -2,11 +2,8 @@ import random
 import string
 import time
 
-from bs4 import BeautifulSoup as bs
 import urllib.parse
 from selenium import webdriver
-
-import pathlib
 
 
 def replace_bullet(str):
@@ -20,6 +17,8 @@ def create_header(header_len=15):
 		if i % 5 == 0 and i:
 			header += "."
 		header += str(random.choice(range(10)))
+	if not header[-1] == '.':
+		header += '.'
 	return header
 
 
@@ -83,19 +82,19 @@ if __name__ == "__main__":
 
 			# Wait for translation to load
 			while True:
-				soup = bs(driver.page_source, 'lxml')
-				elem = soup.find('span', text=header)
-				if elem:
+				try:
+					elem = driver.find_element_by_xpath(f'//span[contains(text(), "{header}")]')
 					break
-				time.sleep(0.25)
+				except:
+					time.sleep(0.25)
 
-			translation = elem.parent.parent
-			translation_lines = translation.find_elements_by_tag_name('span')
+			parent = elem.find_element_by_xpath('../..')
+			lines = parent.text.split('\n')
 
 			# Cleaning text
-			for i in range(len(translation_lines)):
+			for i in range(1, len(lines)):
 				# Get the inner text of the element
-				current_line = translation_lines[i].get_attribute('innerText')
+				current_line = lines[i]
 				# Remove non-breaking spaces unicode character
 				current_line = current_line.replace('&nbsp', ' ')
 				# Remove trailing periods
@@ -109,8 +108,6 @@ if __name__ == "__main__":
 
 				# Add cleaned current line text to final text
 				final_text.append(current_line)
-
-			driver.get('about:blank')
 
 		# Add footer to final text
 		final_text.append(f'</{language_codes[l]}>')
