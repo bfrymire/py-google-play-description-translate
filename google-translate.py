@@ -42,12 +42,12 @@ if __name__ == "__main__":
 
 	# Editing special words that shouldn't be translated
 	code = ''
-	for i in range(len(blacklist_words)):
+	for i, word in enumerate(blacklist_words):
 		while not code or code == header_code or code in blacklist_codes:
 			code = create_code()
 		blacklist_codes.append(code)
-		for k in range(len(change_log_text)):
-			change_log_text[k] = change_log_text[k].replace(blacklist_words[i], blacklist_codes[i])
+		for k, text in enumerate(change_log_text):
+			change_log_text[k] = text.replace(word, code)
 
 	# Join the change_log_text back together
 	change_log_text = '\n'.join(change_log_text)
@@ -57,19 +57,19 @@ if __name__ == "__main__":
 	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
 
 	# Go through each language and get the translation
-	for l in range(len(languages)):
+	for i, language in enumerate(languages):
 
 		# Add header to final text
-		final_text.append(f'<{language_codes[l]}>')
+		final_text.append(f'<{language_codes[i]}>')
 
-		if languages[l] == original_language:
+		if language == original_language:
 			final_text.append(replace_bullet(change_log_text))
 		else:
 			# Params to pass into the url
 			params = {
 				'op': 'translate',
 				'sl': original_language,
-				'tl': languages[l],
+				'tl': language,
 				'text': f'{header_code}\n{change_log_text}',
 			}
 
@@ -93,47 +93,45 @@ if __name__ == "__main__":
 			lines = driver.execute_script(f'return document.querySelector(".{class_}").innerText').split('\n')
 
 			# Cleaning text
-			for i in range(1, len(lines)):
-				# Get the inner text of the element
-				current_line = lines[i]
-				# Skip blank lines
-				if not current_line:
+			for k, line in enumerate(lines):
+				# Skip the header_code line and blank lines
+				if not k or not line:
 					continue
 				# Remove non-breaking spaces unicode character
-				current_line = current_line.replace('&nbsp', ' ')
+				line = line.replace('&nbsp', ' ')
 				# Remove trailing periods
-				while current_line[-1] == '.':
-					current_line = current_line[:-1]
+				while line[-1] == '.':
+					line = line[:-1]
 				# Append space in front of bullet points
-				if current_line[0] == '-':
-					current_line = ' ' + current_line
+				if line[0] == '-':
+					line = ' ' + line
 				# Replace dashes with bullet points
-				current_line = replace_bullet(current_line)
+				line = replace_bullet(line)
 
 				# Add cleaned current line text to final text
-				final_text.append(current_line)
+				final_text.append(line)
 
 		# Add footer to final text
-		final_text.append(f'</{language_codes[l]}>')
+		final_text.append(f'</{language_codes[i]}>')
 
 		# Add a line break between language blocks
-		if not l == len(languages) - 1:
+		if not i == len(languages) - 1:
 			final_text.append('')
 
 	# Close the webdriver
 	driver.close()
 
 	# Turn special words back into their original word
-	for i in range(len(final_text)):
+	for i, text in enumerate(final_text):
 		for k in range(len(blacklist_words)):
-			final_text[i] = final_text[i].replace(blacklist_codes[k], blacklist_words[k])
+			final_text[i] = text.replace(blacklist_codes[k], blacklist_words[k])
 
 	# Clear out old translated change log file
 	# Write final lines to translated change log file
 	with open('output.txt', 'w+') as file:
-		for i in range(len(final_text)):
+		for i, text in enumerate(final_text):
 			# Write each line
-			file.write(final_text[i])
+			file.write(text)
 			# New line except last line
 			if not i == len(final_text) - 1:
 				file.write('\n')
