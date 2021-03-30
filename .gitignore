@@ -141,3 +141,6 @@ cython_debug/
 /webdriver
 /chromedriver
 /geckodriver
+
+# Changelogs
+output.txt
