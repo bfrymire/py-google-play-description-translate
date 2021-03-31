@@ -21,9 +21,7 @@ def create_code(code_len=15, is_header_code=False):
 		code += '.'
 	return code
 
-
-if __name__ == "__main__":
-
+def main():
 	header_code = create_code(is_header_code=True)
 	blacklist_words = ['Version'] # Blacklist words do not get translated
 	blacklist_codes = []
@@ -135,3 +133,7 @@ if __name__ == "__main__":
 			# New line except last line
 			if not i == len(final_text) - 1:
 				file.write('\n')
+
+
+if __name__ == "__main__":
+	main()
