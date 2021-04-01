@@ -6,9 +6,11 @@ import urllib.parse
 from selenium import webdriver
 
 
+def get_bullet_character():
+	return '•'
+
 def replace_bullet(str):
-	# Bullet character
-	bullet = '•'
+	bullet = get_bullet_character()
 	return str.replace(' - ', f' {bullet} ')
 
 def create_code(code_len=15, is_header_code=False):
