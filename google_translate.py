@@ -7,9 +7,11 @@ import urllib.parse
 from selenium import webdriver
 
 
+def get_bullet_character():
+	return '•'
+
 def replace_bullet(str):
-	# Bullet character
-	bullet = '•'
+	bullet = get_bullet_character()
 	return str.replace(' - ', f' {bullet} ')
 
 def create_code(code_len=15, is_header_code=False):
@@ -22,14 +24,12 @@ def create_code(code_len=15, is_header_code=False):
 		code += '.'
 	return code
 
-parser = argparse.ArgumentParser()
-parser.add_argument('input', help='location of file to translate')
+def main():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('input', help='location of file to translate')
 
-args = parser.parse_args()
-
-
-if __name__ == "__main__":
-
+	args = parser.parse_args()
+	
 	header_code = create_code(is_header_code=True)
 	blacklist_words = ['Version'] # Blacklist words do not get translated
 	blacklist_codes = []
@@ -141,3 +141,7 @@ if __name__ == "__main__":
 			# New line except last line
 			if not i == len(final_text) - 1:
 				file.write('\n')
+
+
+if __name__ == "__main__":
+	main()
