@@ -26,7 +26,8 @@ def create_code(code_len=15, is_header_code=False):
 
 def main():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('input', help='location of file to translate')
+	parser.add_argument('--i', '--input', help='location of file to translate',
+						type=str)
 
 	args = parser.parse_args()
 	
