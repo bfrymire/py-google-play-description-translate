@@ -19,19 +19,18 @@ class Language:
 		if self.name.lower() not in self.names:
 			self.names.append(self.name.lower())
 
-def filter_languages(name, language):
-	if name in language.names:
-		return True
-	return False
-
-def get_filtered_language(name, languages):
-	return filter(filter_languages, name)
-
+def filter_languages(names, languages):
+	filtered = []
+	for name in names:
+		for i, l in enumerate(languages, start=1):
+			if name.lower() in l.names:
+				filtered.append(l)
+				break
+			if i == len(languages):
+				print(f'Could not find an associated language for \"{name}\".')
+	return filtered
+	
 def get_google_translate_languages():
 	with open('./data/google_translate_languages.json') as f:
 		data = json.load(f)
 	return [Language(l['language'], l['code']) for l in data['languages']]
-	# l = []
-	# for language in data.languages:
-	# 	l.append(Language(language.language, language.code))
-	# return l
