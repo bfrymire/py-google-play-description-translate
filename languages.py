@@ -8,8 +8,6 @@ class Language:
 		self.names = []
 		self.code = code.strip()
 		self.create_names()
-		# self.localization = local
-		# self.localization_code = local_code
 
 	def __repr__(self):
 		return f'<Language: {self.name} - {self.code}>'
@@ -29,8 +27,17 @@ def filter_languages(names, languages):
 			if i == len(languages):
 				print(f'Could not find an associated language for \"{name}\".')
 	return filtered
+
+def open_json_language_file(path):
+	with open(path) as f:
+		return json.load(f)
 	
-def get_google_translate_languages():
-	with open('./data/google_translate_languages.json') as f:
-		data = json.load(f)
+def create_languages_from_json_data(path):
+	data = open_json_language_file(path)
 	return [Language(l['language'], l['code']) for l in data['languages']]
+
+def get_google_translate_languages():
+	return create_languages_from_json_data('./data/google_translate_languages.json')
+
+def get_google_play_languages():
+	return create_languages_from_json_data('./data/google_play_languages.json')
