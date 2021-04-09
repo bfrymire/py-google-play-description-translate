@@ -3,6 +3,7 @@ import string
 import time
 import json
 import argparse
+import os
 
 import urllib.parse
 from selenium import webdriver
@@ -34,15 +35,36 @@ def first(iter):
 		print('Not an iterable type, supply an array')
 		raise
 
-def main():
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--i', '--input', help='location of file to translate',
-						type=str)
+def print_languages(language_type, languages):
+	print(f'{language_type} Languages ({len(languages)}):\n{"-"*70}\n{[language.name for language in languages]}\n')
 
-	args = parser.parse_args()
-	
-	translate_languages = get_google_translate_languages()
+def main():
 	play_languages = get_google_play_languages()
+	translate_languages = get_google_translate_languages()
+
+	# Argument parser
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-i', '--input', default='./input.txt',
+						help='location of file to translate')
+	parser.add_argument('-o', '--output', default='./output.txt',
+						help='location of file to ouput translation to')
+	parser.add_argument('-p', '--play', action="store_true",
+						help='prints out all Google Play languages')
+	parser.add_argument('-t', '--translate', action="store_true",
+						help='prints out all Google Translate languages')
+	args = parser.parse_args()
+	if args.play:
+		print_languages("Google Play", play_languages)
+	if args.play_codes:
+		print_languages("Google Play", play_languages)
+	if args.translate:
+		print_languages("Google Translate", translate_languages)
+	if args.play or args.translate:
+		quit()
+	if not os.path.exists(args.input):
+		print(f'Input file does not exist: {args.input}')
+		quit()
+	
 	header_code = create_code(is_header_code=True)
 	blacklist_words = ['Version'] # Blacklist words do not get translated
 	blacklist_codes = []
@@ -64,7 +86,7 @@ def main():
 	url = 'https://translate.google.com/#view=home'
 	
 	# "What's New" text file
-	with open('input.txt', 'r') as file:
+	with open(args.input, 'r') as file:
 		change_log_text = [line.rstrip('\n') for line in file]
 
 	# Final text that will be written to translated_change_log
@@ -160,7 +182,7 @@ def main():
 
 	# Clear out old translated change log file
 	# Write final lines to translated change log file
-	with open('output.txt', 'w+') as file:
+	with open(args.output, 'w+') as file:
 		for i, text in enumerate(final_text):
 			# Write each line
 			file.write(text)
