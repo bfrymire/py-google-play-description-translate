@@ -17,14 +17,24 @@ class Language:
 		if self.name.lower() not in self.names:
 			self.names.append(self.name.lower())
 
-def filter_languages(names, languages):
+def filter_languages(names, languages, break_out_on_first=False):
 	filtered = []
 	for name in names:
+		found_languages = 0
 		for i, l in enumerate(languages, start=1):
-			if name.lower() in l.names:
+			if type(name) == str:
+				n = name.lower()
+			elif name.isclass(Language):
+				n = name.name.lower()
+			else:
+				print(f'{type(name)} is not an expected type, skipping.')
+				continue
+			if n in l.names:
 				filtered.append(l)
-				break
-			if i == len(languages):
+				found_languages += 1
+				if break_out_on_first:
+					break
+			if i == len(languages) and not found_languages:
 				print(f'Could not find an associated language for \"{name}\".')
 	return filtered
 
