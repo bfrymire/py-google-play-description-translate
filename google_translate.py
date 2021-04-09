@@ -78,10 +78,6 @@ def main():
 			for t in trans:
 				language_pairs.append((t, p))
 
-	print("language_pairs:")
-	for pair in language_pairs:
-		print(pair)
-
 	# Google Translate url
 	url = 'https://translate.google.com/#view=home'
 	
@@ -110,8 +106,6 @@ def main():
 
 	# Go through each language and get the translation
 	for i, pair in enumerate(language_pairs, start=1):
-
-		print(pair)
 
 		# Add header to final text
 		final_text.append(f'<{pair[1].code}>')
