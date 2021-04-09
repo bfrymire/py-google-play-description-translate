@@ -21,6 +21,10 @@ class GoogleTranslateCase(unittest.TestCase):
 		s = create_code()
 		self.assertEqual(s[-1], '}', 'code created does not end with curley bracket')
 
+	def test_create_code_is_numeric(self):
+		s = create_code()
+		self.assertTrue(s[1:-1].isnumeric(), 'code created is not numeric')
+
 	def test_get_bullet_character(self):
 		b = get_bullet_character()
 		s = '•'
