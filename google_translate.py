@@ -1,9 +1,12 @@
 import random
 import string
 import time
+import json
 
 import urllib.parse
 from selenium import webdriver
+
+from languages import Language, get_google_translate_languages, get_google_play_languages, filter_languages
 
 
 def get_bullet_character():
@@ -23,13 +26,33 @@ def create_code(code_len=15, is_header_code=False):
 		code += '.'
 	return code
 
+def first(iter):
+	try:
+		return iter[0]
+	except TypeError:
+		print('Not an iterable type, supply an array')
+		raise
+
 def main():
+	translate_languages = get_google_translate_languages()
+	play_languages = get_google_play_languages()
 	header_code = create_code(is_header_code=True)
 	blacklist_words = ['Version'] # Blacklist words do not get translated
 	blacklist_codes = []
-	original_language = 'en'
-	languages = ['en', 'es', 'pt']
-	language_codes = ['en-US', 'es-ES', 'pt-BR']
+	base_trans_lang = first(filter_languages(['English'], translate_languages))
+	languages = ['English', 'Spanish', 'Portuguese']
+	language_pairs = []
+	for language in languages:
+		play = filter_languages([language], play_languages)
+		for p in play:
+			trans = filter_languages([language], translate_languages)
+			for t in trans:
+				language_pairs.append((t, p))
+
+	print("language_pairs:")
+	for pair in language_pairs:
+		print(pair)
+
 	# Google Translate url
 	url = 'https://translate.google.com/#view=home'
 	
@@ -57,24 +80,26 @@ def main():
 	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
 
 	# Go through each language and get the translation
-	for i, language in enumerate(languages):
+	for i, pair in enumerate(language_pairs, start=1):
+
+		print(pair)
 
 		# Add header to final text
-		final_text.append(f'<{language_codes[i]}>')
+		final_text.append(f'<{pair[1].code}>')
 
-		if language == original_language:
+		if base_trans_lang.name.lower() in pair[0].names:
 			final_text.append(replace_bullet(change_log_text))
 		else:
 			# Params to pass into the url
 			params = {
 				'op': 'translate',
-				'sl': original_language,
-				'tl': language,
+				'sl': base_trans_lang.code,
+				'tl': pair[0].code,
 				'text': f'{header_code}\n{change_log_text}',
 			}
 
 			# Create the full url
-			full_url = f'https://translate.google.com/#view=home&{urllib.parse.urlencode(params)}'
+			full_url = f'{url}&{urllib.parse.urlencode(params)}'
 
 			# Go to the full url
 			driver.get(full_url)
@@ -94,8 +119,8 @@ def main():
 
 			# Cleaning text
 			for k, line in enumerate(lines):
-				# Skip the header_code line and blank lines
-				if not k or not line:
+				# Skip blank lines and the header_code line
+				if not line or not k:
 					continue
 				# Remove non-breaking spaces unicode character
 				line = line.replace('&nbsp', ' ')
@@ -112,10 +137,10 @@ def main():
 				final_text.append(line)
 
 		# Add footer to final text
-		final_text.append(f'</{language_codes[i]}>')
+		final_text.append(f'</{pair[1].code}>')
 
 		# Add a line break between language blocks
-		if not i == len(languages) - 1:
+		if not i == len(language_pairs):
 			final_text.append('')
 
 	# Close the webdriver
