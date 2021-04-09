@@ -4,7 +4,7 @@ import json
 class Language:
 	
 	def __init__(self, name, code):
-		self.name = name
+		self.name = name.strip()
 		self.names = []
 		self.code = code.strip()
 		self.create_names()
