@@ -35,8 +35,8 @@ def first(iter):
 		print('Not an iterable type, supply an array')
 		raise
 
-def print_languages(language_type, languages):
-	print(f'{language_type} Languages ({len(languages)}):\n{"-"*70}\n{[language.name for language in languages]}\n')
+def print_languages(language_type, languages, attr):
+	print(f'{language_type} Languages ({len(languages)}):\n{"-"*70}\n{[getattr(language, attr) for language in languages]}\n')
 
 def main():
 	play_languages = get_google_play_languages()
@@ -50,16 +50,22 @@ def main():
 						help='location of file to ouput translation to')
 	parser.add_argument('-p', '--play', action="store_true",
 						help='prints out all Google Play languages')
+	parser.add_argument('-p-c', '--play-codes', action="store_true",
+						help='prints out all Google Play language codes')
 	parser.add_argument('-t', '--translate', action="store_true",
 						help='prints out all Google Translate languages')
+	parser.add_argument('-t-c', '--translate-codes', action="store_true",
+						help='prints out all Google Translate language codes')
 	args = parser.parse_args()
 	if args.play:
-		print_languages("Google Play", play_languages)
+		print_languages("Google Play", play_languages, 'name')
 	if args.play_codes:
-		print_languages("Google Play", play_languages)
+		print_languages("Google Play", play_languages, 'code')
 	if args.translate:
-		print_languages("Google Translate", translate_languages)
-	if args.play or args.translate:
+		print_languages("Google Translate", translate_languages, 'name')
+	if args.translate_codes:
+		print_languages("Google Translate", translate_languages, 'code')
+	if args.play or args.play_codes or args.translate or args.translate_codes:
 		quit()
 	if not os.path.exists(args.input):
 		print(f'Input file does not exist: {args.input}')
