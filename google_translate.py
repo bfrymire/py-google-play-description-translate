@@ -59,10 +59,12 @@ def main():
 						help='prints out all Google Translate language codes')
 	parser.add_argument('-hd', '--head', action="store_true",
 						help='runs the browser without headless mode enabled')
-	parser.add_argument('-b', '--blacklist', nargs='+',
+	parser.add_argument('-bl', '--blacklist', nargs='+',
 						help='words that do not get translated')
 	parser.add_argument('-v', '--verbosity', type=int, default=0,
 						help='increase output verbosity')
+	parser.add_argument('-b', '--base-language', default='English',
+						help='set the base language of your input file')
 	args = parser.parse_args()
 	if args.play:
 		print_languages('Google Play', play_languages, 'name')
@@ -85,7 +87,12 @@ def main():
 		blacklist_words = args.blacklist
 	
 	header_code = create_code(is_header_code=True)
-	base_trans_lang = first(filter_languages(['English'], translate_languages))
+	base_trans_lang = first(filter_languages([args.base_language], translate_languages))
+	if not base_trans_lang:
+		print(f'Unable to find base language for {args.base_language}. Run --translate to get langauges.')
+		quit()
+	if args.verbosity >= 2:
+		print(f'Setting base language to {base_trans_lang.name}')
 	languages = ['English', 'Spanish', 'Portuguese']
 	language_pairs = []
 	for language in languages:
@@ -223,7 +230,8 @@ def main():
 			# New line except last line
 			if not i == len(final_text) - 1:
 				file.write('\n')
-
+	if args.verbosity >= 2:
+		print(f'Translations in file: {args.output}')
 	print('DONE!')
 
 if __name__ == "__main__":
