@@ -46,7 +46,7 @@ def main():
 	# Argument parser
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-i', '--input', default='./input.txt',
-						help='location of file to translate')
+						help='location of a text file to translate')
 	parser.add_argument('-o', '--output', default='./output.txt',
 						help='location of file to ouput translation to')
 	parser.add_argument('-p', '--play', action="store_true",
@@ -59,24 +59,30 @@ def main():
 						help='prints out all Google Translate language codes')
 	parser.add_argument('-hd', '--head', action="store_true",
 						help='runs the browser without headless mode enabled')
+	parser.add_argument('-b', '--blacklist', nargs='+',
+						help='words that do not get translated')
 	args = parser.parse_args()
 	if args.play:
-		print_languages("Google Play", play_languages, 'name')
+		print_languages('Google Play', play_languages, 'name')
 	if args.play_codes:
-		print_languages("Google Play", play_languages, 'code')
+		print_languages('Google Play', play_languages, 'code')
 	if args.translate:
-		print_languages("Google Translate", translate_languages, 'name')
+		print_languages('Google Translate', translate_languages, 'name')
 	if args.translate_codes:
-		print_languages("Google Translate", translate_languages, 'code')
+		print_languages('Google Translate', translate_languages, 'code')
 	if args.play or args.play_codes or args.translate or args.translate_codes:
 		quit()
 	if not os.path.exists(args.input):
 		print(f'Input file does not exist: {args.input}')
 		quit()
+
+	 # Blacklist words do not get translated
+	blacklist_words = []
+	blacklist_codes = []
+	if args.blacklist:
+		blacklist_words = args.blacklist
 	
 	header_code = create_code(is_header_code=True)
-	blacklist_words = ['Version'] # Blacklist words do not get translated
-	blacklist_codes = []
 	base_trans_lang = first(filter_languages(['English'], translate_languages))
 	languages = ['English', 'Spanish', 'Portuguese']
 	language_pairs = []
@@ -97,7 +103,7 @@ def main():
 	# Final text that will be written to translated_change_log
 	final_text = []
 
-	# Editing special words that shouldn't be translated
+	# Creating blacklist code words and replacing blacklist words with them
 	code = ''
 	for i, word in enumerate(blacklist_words):
 		while not code or code == header_code or code in blacklist_codes:
@@ -182,7 +188,7 @@ def main():
 	# Close the webdriver
 	driver.close()
 
-	# Turn special words back into their original word
+	# Turn blacklist words back into their original word
 	for i, text in enumerate(final_text):
 		for k in range(len(blacklist_words)):
 			final_text[i] = text.replace(blacklist_codes[k], blacklist_words[k])
