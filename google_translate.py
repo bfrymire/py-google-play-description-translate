@@ -7,6 +7,7 @@ import os
 
 import urllib.parse
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 from languages import Language, get_google_translate_languages, get_google_play_languages, filter_languages
 
@@ -50,12 +51,14 @@ def main():
 						help='location of file to ouput translation to')
 	parser.add_argument('-p', '--play', action="store_true",
 						help='prints out all Google Play languages')
-	parser.add_argument('-p-c', '--play-codes', action="store_true",
+	parser.add_argument('-pc', '--play-codes', action="store_true",
 						help='prints out all Google Play language codes')
 	parser.add_argument('-t', '--translate', action="store_true",
 						help='prints out all Google Translate languages')
-	parser.add_argument('-t-c', '--translate-codes', action="store_true",
+	parser.add_argument('-tc', '--translate-codes', action="store_true",
 						help='prints out all Google Translate language codes')
+	parser.add_argument('-hd', '--head', action="store_true",
+						help='runs the browser without headless mode enabled')
 	args = parser.parse_args()
 	if args.play:
 		print_languages("Google Play", play_languages, 'name')
@@ -106,8 +109,12 @@ def main():
 	# Join the change_log_text back together
 	change_log_text = '\n'.join(change_log_text)
 
+	options = Options()
+	if not args.head:
+		options.add_argument('--headless')
+	options.add_experimental_option('excludeSwitches', ['enable-logging'])
 	# driver = webdriver.Chrome() ## Use with Google Chrome
-	driver = webdriver.Chrome('./chromedriver/chromedriver') ## Use with Google Chrome
+	driver = webdriver.Chrome('./chromedriver/chromedriver', options=options) ## Use with Google Chrome
 	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
 
 	# Go through each language and get the translation
