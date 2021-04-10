@@ -61,6 +61,8 @@ def main():
 						help='runs the browser without headless mode enabled')
 	parser.add_argument('-b', '--blacklist', nargs='+',
 						help='words that do not get translated')
+	parser.add_argument('-v', '--verbosity', type=int, default=0,
+						help='increase output verbosity')
 	args = parser.parse_args()
 	if args.play:
 		print_languages('Google Play', play_languages, 'name')
@@ -104,6 +106,9 @@ def main():
 	final_text = []
 
 	# Creating blacklist code words and replacing blacklist words with them
+	if len(blacklist_words) > 0:
+		if args.verbosity >= 1:
+			print('Creating blacklist codes')
 	code = ''
 	for i, word in enumerate(blacklist_words):
 		while not code or code == header_code or code in blacklist_codes:
@@ -120,6 +125,11 @@ def main():
 		options.add_argument('--headless')
 	options.add_experimental_option('excludeSwitches', ['enable-logging'])
 	# driver = webdriver.Chrome() ## Use with Google Chrome
+	if args.verbosity >= 1:
+		if args.head:
+			print('Starting browser in headless mode')
+		else:
+			print('Starting browser in headless mode')
 	driver = webdriver.Chrome('./chromedriver/chromedriver', options=options) ## Use with Google Chrome
 	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
 
@@ -130,8 +140,13 @@ def main():
 		final_text.append(f'<{pair[1].code}>')
 
 		if base_trans_lang.name.lower() in pair[0].names:
+			if args.verbosity >= 1:
+				print(f'Adding {base_trans_lang.name} to final text')
 			final_text.append(replace_bullet(change_log_text))
 		else:
+			if args.verbosity >= 1:
+				print(f'Translating text to {pair[0].name}')
+
 			# Params to pass into the url
 			params = {
 				'op': 'translate',
@@ -146,6 +161,8 @@ def main():
 			# Go to the full url
 			driver.get(full_url)
 
+			if args.verbosity >= 2:
+				print('Waiting for translation to complete')
 			# Wait for translation to load
 			while True:
 				try:
@@ -189,12 +206,16 @@ def main():
 	driver.close()
 
 	# Turn blacklist words back into their original word
+	if args.verbosity >= 1:
+		print('Turning blacklist words back to their original word')
 	for i, text in enumerate(final_text):
 		for k in range(len(blacklist_words)):
 			final_text[i] = text.replace(blacklist_codes[k], blacklist_words[k])
 
 	# Clear out old translated change log file
 	# Write final lines to translated change log file
+	if args.verbosity >= 1:
+		print('Writing translations to output file')
 	with open(args.output, 'w+') as file:
 		for i, text in enumerate(final_text):
 			# Write each line
@@ -203,6 +224,7 @@ def main():
 			if not i == len(final_text) - 1:
 				file.write('\n')
 
+	print('DONE!')
 
 if __name__ == "__main__":
 	main()
