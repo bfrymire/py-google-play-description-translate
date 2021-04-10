@@ -78,7 +78,7 @@ def main():
 		print(f'Input file does not exist: {args.input}')
 		quit()
 
-	 # Blacklist words do not get translated
+	# Blacklist words do not get translated
 	blacklist_words = []
 	blacklist_codes = []
 	if args.blacklist:
@@ -133,7 +133,6 @@ def main():
 	if not args.head:
 		options.add_argument('--headless')
 	options.add_experimental_option('excludeSwitches', ['enable-logging'])
-	# driver = webdriver.Chrome() ## Use with Google Chrome
 	if args.verbosity >= 1:
 		if args.head:
 			print('Starting web browser in headless mode')
@@ -228,11 +227,11 @@ def main():
 	if args.verbosity >= 1:
 		print('Writing translations to output file')
 	with open(args.output, 'w+') as file:
-		for i, text in enumerate(final_text):
+		for i, text in enumerate(final_text, start=1):
 			# Write each line
 			file.write(text)
 			# New line except last line
-			if not i == len(final_text) - 1:
+			if not i == len(final_text):
 				file.write('\n')
 	if args.verbosity >= 2:
 		print(f'Translations in file: {args.output}')
