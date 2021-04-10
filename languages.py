@@ -24,7 +24,7 @@ def filter_languages(names, languages, break_out_on_first=False):
 		for i, l in enumerate(languages, start=1):
 			if type(name) == str:
 				n = name.lower()
-			elif name.isclass(Language):
+			elif isinstance(name, Language):
 				n = name.name.lower()
 			else:
 				print(f'{type(name)} is not an expected type, skipping.')

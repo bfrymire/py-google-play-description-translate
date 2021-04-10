@@ -2,9 +2,12 @@ import random
 import string
 import time
 import json
+import argparse
+import os
 
 import urllib.parse
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 from languages import Language, get_google_translate_languages, get_google_play_languages, filter_languages
 
@@ -27,20 +30,72 @@ def create_code(code_len=15, is_header_code=False):
 	return code
 
 def first(iter):
-	try:
-		return iter[0]
-	except TypeError:
-		print('Not an iterable type, supply an array')
-		raise
+	return iter[0]
+
+def print_languages(language_type, languages, attr):
+	print(f'{language_type} Languages ({len(languages)}):\n{"-"*70}\n{[getattr(language, attr) for language in languages]}\n')
 
 def main():
-	translate_languages = get_google_translate_languages()
 	play_languages = get_google_play_languages()
-	header_code = create_code(is_header_code=True)
-	blacklist_words = ['Version'] # Blacklist words do not get translated
+	translate_languages = get_google_translate_languages()
+
+	# Argument parser
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-ol', '--output-language', nargs='+', required=True,
+						help='languages to translate input file to')
+	parser.add_argument('-b', '--base-language', default='English',
+						help='language of input file')
+	parser.add_argument('-i', '--input', default='./input.txt',
+						help='location of a text file to translate')
+	parser.add_argument('-o', '--output', default='./output.txt',
+						help='location of file to ouput translation to')
+	parser.add_argument('-t', '--translate', action="store_true",
+						help='prints out all Google Translate languages')
+	parser.add_argument('-tc', '--translate-codes', action="store_true",
+						help='prints out all Google Translate language codes')
+	parser.add_argument('-p', '--play', action="store_true",
+						help='prints out all Google Play languages')
+	parser.add_argument('-pc', '--play-codes', action="store_true",
+						help='prints out all Google Play language codes')
+	parser.add_argument('-hd', '--head', action="store_true",
+						help='runs the browser not in headless mode')
+	parser.add_argument('-bl', '--blacklist', nargs='+',
+						help='words that do not get translated')
+	parser.add_argument('-v', '--verbosity', type=int, default=0,
+						help='increase output verbosity')
+	args = parser.parse_args()
+	if args.play:
+		print_languages('Google Play', play_languages, 'name')
+	if args.play_codes:
+		print_languages('Google Play', play_languages, 'code')
+	if args.translate:
+		print_languages('Google Translate', translate_languages, 'name')
+	if args.translate_codes:
+		print_languages('Google Translate', translate_languages, 'code')
+	if args.play or args.play_codes or args.translate or args.translate_codes:
+		quit()
+	if not os.path.exists(args.input):
+		print(f'Input file does not exist: {args.input}')
+		quit()
+
+	# Blacklist words do not get translated
+	blacklist_words = []
 	blacklist_codes = []
-	base_trans_lang = first(filter_languages(['English'], translate_languages))
-	languages = ['English', 'Spanish', 'Portuguese']
+	if args.blacklist:
+		blacklist_words = args.blacklist
+	
+	header_code = create_code(is_header_code=True)
+	base_trans_lang = first(filter_languages([args.base_language], translate_languages))
+	if not base_trans_lang:
+		print(f'Unable to find base language for {args.base_language}. Run --translate to get langauges.')
+		quit()
+	if args.verbosity >= 2:
+		print(f'Setting base language to {base_trans_lang.name}')
+	languages = args.output_language
+	if not base_trans_lang in languages:
+		if args.verbosity >= 1:
+			print(f'Adding base language, {base_trans_lang.name} to output languages')
+		languages.insert(0, base_trans_lang.name)
 	language_pairs = []
 	for language in languages:
 		play = filter_languages([language], play_languages)
@@ -49,21 +104,20 @@ def main():
 			for t in trans:
 				language_pairs.append((t, p))
 
-	print("language_pairs:")
-	for pair in language_pairs:
-		print(pair)
-
 	# Google Translate url
 	url = 'https://translate.google.com/#view=home'
 	
 	# "What's New" text file
-	with open('input.txt', 'r') as file:
+	with open(args.input, 'r') as file:
 		change_log_text = [line.rstrip('\n') for line in file]
 
 	# Final text that will be written to translated_change_log
 	final_text = []
 
-	# Editing special words that shouldn't be translated
+	# Creating blacklist code words and replacing blacklist words with them
+	if len(blacklist_words) > 0:
+		if args.verbosity >= 1:
+			print('Creating blacklist codes')
 	code = ''
 	for i, word in enumerate(blacklist_words):
 		while not code or code == header_code or code in blacklist_codes:
@@ -75,21 +129,32 @@ def main():
 	# Join the change_log_text back together
 	change_log_text = '\n'.join(change_log_text)
 
-	# driver = webdriver.Chrome() ## Use with Google Chrome
-	driver = webdriver.Chrome('./chromedriver/chromedriver') ## Use with Google Chrome
+	options = Options()
+	if not args.head:
+		options.add_argument('--headless')
+	options.add_experimental_option('excludeSwitches', ['enable-logging'])
+	if args.verbosity >= 1:
+		if args.head:
+			print('Starting web browser in headless mode')
+		else:
+			print('Starting web browser in headless mode')
+	driver = webdriver.Chrome('./chromedriver/chromedriver', options=options) ## Use with Google Chrome
 	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
 
 	# Go through each language and get the translation
 	for i, pair in enumerate(language_pairs, start=1):
 
-		print(pair)
-
 		# Add header to final text
 		final_text.append(f'<{pair[1].code}>')
 
 		if base_trans_lang.name.lower() in pair[0].names:
+			if args.verbosity >= 1:
+				print(f'Adding {base_trans_lang.name} to final text')
 			final_text.append(replace_bullet(change_log_text))
 		else:
+			if args.verbosity >= 1:
+				print(f'Translating text to {pair[0].name}')
+
 			# Params to pass into the url
 			params = {
 				'op': 'translate',
@@ -104,6 +169,8 @@ def main():
 			# Go to the full url
 			driver.get(full_url)
 
+			if args.verbosity >= 2:
+				print('Waiting for translation to complete')
 			# Wait for translation to load
 			while True:
 				try:
@@ -144,23 +211,31 @@ def main():
 			final_text.append('')
 
 	# Close the webdriver
+	if args.verbosity >= 1:
+		print('Closing web browser')
 	driver.close()
 
-	# Turn special words back into their original word
+	# Turn blacklist words back into their original words
+	if args.verbosity >= 1:
+		print('Turning blacklist words back to their original words')
 	for i, text in enumerate(final_text):
 		for k in range(len(blacklist_words)):
 			final_text[i] = text.replace(blacklist_codes[k], blacklist_words[k])
 
 	# Clear out old translated change log file
 	# Write final lines to translated change log file
-	with open('output.txt', 'w+') as file:
-		for i, text in enumerate(final_text):
+	if args.verbosity >= 1:
+		print('Writing translations to output file')
+	with open(args.output, 'w+') as file:
+		for i, text in enumerate(final_text, start=1):
 			# Write each line
 			file.write(text)
 			# New line except last line
-			if not i == len(final_text) - 1:
+			if not i == len(final_text):
 				file.write('\n')
-
+	if args.verbosity >= 2:
+		print(f'Translations in file: {args.output}')
+	print('DONE!')
 
 if __name__ == "__main__":
 	main()
