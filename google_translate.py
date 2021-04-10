@@ -111,7 +111,7 @@ def main():
 	with open(args.input, 'r') as file:
 		change_log_text = [line.rstrip('\n') for line in file]
 
-	# Final text that will be written to translated_change_log
+	# Final text that will be written to output file
 	final_text = []
 
 	# Creating blacklist code words and replacing blacklist words with them
