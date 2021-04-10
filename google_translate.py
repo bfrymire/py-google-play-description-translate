@@ -30,11 +30,7 @@ def create_code(code_len=15, is_header_code=False):
 	return code
 
 def first(iter):
-	try:
-		return iter[0]
-	except TypeError:
-		print('Not an iterable type, supply an array')
-		raise
+	return iter[0]
 
 def print_languages(language_type, languages, attr):
 	print(f'{language_type} Languages ({len(languages)}):\n{"-"*70}\n{[getattr(language, attr) for language in languages]}\n')
