@@ -41,26 +41,28 @@ def main():
 
 	# Argument parser
 	parser = argparse.ArgumentParser()
+	parser.add_argument('-ol', '--output-language', nargs='+', required=True,
+						help='languages to translate input file to')
+	parser.add_argument('-b', '--base-language', default='English',
+						help='language of input file')
 	parser.add_argument('-i', '--input', default='./input.txt',
 						help='location of a text file to translate')
 	parser.add_argument('-o', '--output', default='./output.txt',
 						help='location of file to ouput translation to')
-	parser.add_argument('-p', '--play', action="store_true",
-						help='prints out all Google Play languages')
-	parser.add_argument('-pc', '--play-codes', action="store_true",
-						help='prints out all Google Play language codes')
 	parser.add_argument('-t', '--translate', action="store_true",
 						help='prints out all Google Translate languages')
 	parser.add_argument('-tc', '--translate-codes', action="store_true",
 						help='prints out all Google Translate language codes')
+	parser.add_argument('-p', '--play', action="store_true",
+						help='prints out all Google Play languages')
+	parser.add_argument('-pc', '--play-codes', action="store_true",
+						help='prints out all Google Play language codes')
 	parser.add_argument('-hd', '--head', action="store_true",
-						help='runs the browser without headless mode enabled')
+						help='runs the browser not in headless mode')
 	parser.add_argument('-bl', '--blacklist', nargs='+',
 						help='words that do not get translated')
 	parser.add_argument('-v', '--verbosity', type=int, default=0,
 						help='increase output verbosity')
-	parser.add_argument('-b', '--base-language', default='English',
-						help='set the base language of your input file')
 	args = parser.parse_args()
 	if args.play:
 		print_languages('Google Play', play_languages, 'name')
@@ -89,7 +91,11 @@ def main():
 		quit()
 	if args.verbosity >= 2:
 		print(f'Setting base language to {base_trans_lang.name}')
-	languages = ['English', 'Spanish', 'Portuguese']
+	languages = args.output_language
+	if not base_trans_lang in languages:
+		if args.verbosity >= 1:
+			print(f'Adding base language, {base_trans_lang.name} to output languages')
+		languages.insert(0, base_trans_lang.name)
 	language_pairs = []
 	for language in languages:
 		play = filter_languages([language], play_languages)
@@ -130,9 +136,9 @@ def main():
 	# driver = webdriver.Chrome() ## Use with Google Chrome
 	if args.verbosity >= 1:
 		if args.head:
-			print('Starting browser in headless mode')
+			print('Starting web browser in headless mode')
 		else:
-			print('Starting browser in headless mode')
+			print('Starting web browser in headless mode')
 	driver = webdriver.Chrome('./chromedriver/chromedriver', options=options) ## Use with Google Chrome
 	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
 
@@ -206,11 +212,13 @@ def main():
 			final_text.append('')
 
 	# Close the webdriver
+	if args.verbosity >= 1:
+		print('Closing web browser')
 	driver.close()
 
-	# Turn blacklist words back into their original word
+	# Turn blacklist words back into their original words
 	if args.verbosity >= 1:
-		print('Turning blacklist words back to their original word')
+		print('Turning blacklist words back to their original words')
 	for i, text in enumerate(final_text):
 		for k in range(len(blacklist_words)):
 			final_text[i] = text.replace(blacklist_codes[k], blacklist_words[k])
