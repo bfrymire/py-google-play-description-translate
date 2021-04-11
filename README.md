@@ -25,7 +25,7 @@ python google_translate.py --help
 Basic usage:
 
 ```bash
-python google_translate.py -output-language Spanish Portuguese
+python google_translate.py --output-language Spanish Portuguese
 ```
 
 Running this will use the English text from `input.txt`, and translate it to Spanish and Portuguese, then dump the original text and translations to `output.txt`
