@@ -138,7 +138,7 @@ def main():
 			print('Starting web browser in headless mode')
 		else:
 			print('Starting web browser in headless mode')
-	driver = webdriver.Chrome('./chromedriver/chromedriver', options=options) ## Use with Google Chrome
+	driver = webdriver.Chrome(options=options) ## Use with Google Chrome
 	# driver = webdriver.Firefox() ## Use with Mozilla Firefox
 
 	# Go through each language and get the translation
