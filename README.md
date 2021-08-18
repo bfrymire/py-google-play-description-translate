@@ -11,7 +11,7 @@ pip install -r requirements.txt
 `google_translate.py` is currently equipped to use Selenium Chromedriver as it's method to render a web page. If there's any interest in having the choice in which webdriver you want to use, open an issue.
 
 1. Download Google Chromedriver.
-	1. Make sure to download the correct version that works with your OS here: https://sites.google.com/a/chromium.org/chromedriver/
+	1. Make sure to download the correct version that works with your OS here: https://sites.google.com/chromium.org/driver/home
 1. Install Chromedriver in your `PATH` so Python can use the webdriver.
 
 ## Usage
