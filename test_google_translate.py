@@ -1,6 +1,6 @@
 import unittest
 
-from google_translate import replace_bullet, get_bullet_character, create_code
+from google_translate import replace_bullet, get_bullet_character, create_code, first
 
 
 class GoogleTranslateCase(unittest.TestCase):
@@ -42,6 +42,14 @@ class GoogleTranslateCase(unittest.TestCase):
 	def test_not_replace_bullet(self):
 		s = '-'
 		self.assertEqual('-', replace_bullet(s), 'strings are not equal after bullet replace')
+
+	def test_first_array(self):
+		a = ['First', 'Second']
+		self.assertEqual('First', first(a))
+
+	def test_first_string(self):
+		s = 'Test'
+		self.assertEqual('T', first(s))
 
 
 if __name__ == '__main__':
