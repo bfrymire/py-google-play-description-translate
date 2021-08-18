@@ -22,7 +22,7 @@ pip install -r requirements.txt
 python google_translate.py --help
 ```
 
-Basic usage:
+### Basic usage:
 
 ```bash
 python google_translate.py --output-language Spanish Portuguese
